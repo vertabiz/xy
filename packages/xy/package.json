@@ -1,0 +1,24 @@
+{
+  "name": "@vertabiz/xy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@ava/typescript": "^3.0.1",
+    "ava": "^4.0.1",
+    "ts-node": "^10.6.0"
+  },
+  "ava": {
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
+  }
+}
