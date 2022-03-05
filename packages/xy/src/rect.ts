@@ -79,8 +79,27 @@ export function isEqual(rect: Rect | null, other: Rect | null): boolean {
 }
 
 export function newRect(origin: Point, size: Size): Rect {
+  const width  = Math.abs(size.w)
+  const height = Math.abs(size.h)
+
+  const wasNegativeWidth   = size.w < 0
+  const wasNegativeHeight  = size.h < 0
+
+  const originX = wasNegativeWidth
+    ? origin.x - width
+    : origin.x
+  const originY = wasNegativeHeight
+    ? origin.y - height
+    : origin.y
+
   return {
-    origin,
-    size,
+    origin: {
+      x: originX,
+      y: originY,
+    },
+    size: {
+      w: width,
+      h: height,
+    },
   }
 }

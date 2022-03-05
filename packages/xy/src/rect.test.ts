@@ -12,6 +12,15 @@ test('newRect', t => {
   })
 })
 
+test('newRect -> normalizes Rects with negative sizes', t => {
+  const rect = newRect( newPoint(106, 146), newSize(-100, -100) )
+
+  t.deepEqual(rect, {
+    origin: { x: 6, y: 46 },
+    size: { w: 100, h: 100 },
+  })
+})
+
 test('expandTo(rect, point) -> returns new Rect which has been expanded to include new point (if needed)', t => {
   const startingRect = newRect(
     newPoint(10, 20),
@@ -25,6 +34,7 @@ test('expandTo(rect, point) -> returns new Rect which has been expanded to inclu
     newRect( newPoint(10, 20), newSize(91, 90) ),
   )
 })
+
 
 test('intersection -> with intersecting rects (basic)', t => {
   const rectOne = newRect( newPoint(10, 20), newSize(50, 90) )
