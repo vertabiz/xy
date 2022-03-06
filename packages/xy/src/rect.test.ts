@@ -1,6 +1,6 @@
 import test from 'ava'
-import { newPoint, isEqual as isPointEqual } from './point'
-import { intersection, isEqual, newRect, farPointOf, expandTo } from './rect'
+import { newPoint } from './point'
+import { intersection, newRect, farPointOf, expandTo, rectForPoints } from './rect'
 import { newSize } from './size'
 
 test('newRect', t => {
@@ -21,20 +21,32 @@ test('newRect -> normalizes Rects with negative sizes', t => {
   })
 })
 
-test('expandTo(rect, point) -> returns new Rect which has been expanded to include new point (if needed)', t => {
-  const startingRect = newRect(
+test('rectForPoints(points) -> returns rect that includes all points', t => {
+  const rect = rectForPoints([
+    newPoint(3, 4),
+    newPoint(10, 7),
+    newPoint(4, 9),
+  ])
+
+  t.deepEqual(
+    rect,
+    newRect( newPoint(3, 4), newSize(8, 6) ),
+  )
+})
+
+test('expandTo(rect, point) -> mutates Rect to include new point (if needed)', t => {
+  const rect = newRect(
     newPoint(10, 20),
     newSize(50, 90),
   )
 
-  const largerRect = expandTo(startingRect, newPoint(100, 45))
+  expandTo(rect, newPoint(100, 45))
 
   t.deepEqual(
-    largerRect,
+    rect,
     newRect( newPoint(10, 20), newSize(91, 90) ),
   )
 })
-
 
 test('intersection -> with intersecting rects (basic)', t => {
   const rectOne = newRect( newPoint(10, 20), newSize(50, 90) )

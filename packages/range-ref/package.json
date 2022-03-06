@@ -1,5 +1,5 @@
 {
-  "name": "@vertabiz/xy",
+  "name": "@vertabiz/range-ref",
   "version": "1.0.0",
   "description": "",
   "main": "build/index.js",
@@ -27,5 +27,9 @@
     "require": [
       "ts-node/register"
     ]
+  },
+  "dependencies": {
+    "@flighter/a1-notation": "^2.1.2",
+    "@vertabiz/xy": "^1.0.0"
   }
 }

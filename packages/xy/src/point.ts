@@ -1,7 +1,15 @@
+import { isObjectWithKey } from './util'
 
 export type Point = {
   x: number
   y: number
+}
+
+export function isPoint(value: unknown): value is Point {
+  return isObjectWithKey(value, 'x')
+    && isObjectWithKey(value, 'y')
+    && typeof value.x == 'number'
+    && typeof value.y == 'number'
 }
 
 /**
@@ -11,7 +19,7 @@ export type Point = {
  *    isEqual({x: 5, y: 10}, {x: 5, y: 10})   # => true
  * ```
  */
-export function isEqual(point: Point, other: Point): boolean {
+export function isPointEqual(point: Point, other: Point): boolean {
   return point.x == other.x
       && point.y == other.y
 }

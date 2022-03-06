@@ -1,26 +1,31 @@
-import { Point, isEqual as isPointEqual, newPoint } from './point'
-import { Size, isEqual as isSizeEqual, newSize } from './size'
+import { Point, isPointEqual, newPoint, isPoint } from './point'
+import { Size, isSizeEqual, newSize, isSize } from './size'
+import { isObjectWithKey } from './util'
 
 export type Rect = {
   origin: Point
   size: Size
 }
 
-export function expandTo(rect: Rect, point: Point): Rect {
+export function isRect(value: unknown): value is Rect {
+  return isObjectWithKey(value, 'origin')
+    && isObjectWithKey(value, 'size')
+    && isPoint(value.origin)
+    && isSize(value.size)
+}
+
+export function expandTo(rect: Rect, point: Point): void {
   const farPoint = farPointOf(rect)
 
-  const newOrigin = newPoint(
-    Math.min(rect.origin.x, point.x),
-    Math.min(rect.origin.y, point.y),
-  )
+  const newOriginX  = Math.min(rect.origin.x, point.x)
+  const newOriginY  = Math.min(rect.origin.y, point.y)
+  const newWidth    = Math.max(farPoint.x, point.x) - newOriginX + 1
+  const newHeight   = Math.max(farPoint.y, point.y) - newOriginY + 1
 
-  return newRect(
-    newOrigin,
-    newSize(
-      Math.max(farPoint.x, point.x) - newOrigin.x + 1,
-      Math.max(farPoint.y, point.y) - newOrigin.y + 1,
-    ),
-  )
+  rect.origin.x = newOriginX
+  rect.origin.y = newOriginY
+  rect.size.w = newWidth
+  rect.size.h = newHeight
 }
 
 /**
@@ -37,6 +42,19 @@ export function farPointOf(rect: Rect | null): Point | null {
     rect.origin.x + rect.size.w - 1,
     rect.origin.y + rect.size.h - 1,
   )
+}
+
+export function rectForPoints(points: Point[]): Rect | null {
+  if (points.length < 1)
+    return null
+
+  const rect = newRect(points[0], newSize(1,1))
+
+  for (const point of points) {
+    expandTo(rect, point)
+  }
+
+  return rect
 }
 
 /**
@@ -64,13 +82,13 @@ export function intersection(rect: Rect | null, other: Rect | null): Rect | null
   if (bottom < top || right < left)
     return null
 
-  return expandTo(
-    newRect( newPoint(left, top), newSize(1, 1) ),
-    newPoint( right, bottom ),
-  )
+  return rectForPoints([
+    newPoint(left, top),
+    newPoint(right, bottom),
+  ])
 }
 
-export function isEqual(rect: Rect | null, other: Rect | null): boolean {
+export function isRectEqual(rect: Rect | null, other: Rect | null): boolean {
   if (rect == null || other == null)
     return rect == null && other == null
 
