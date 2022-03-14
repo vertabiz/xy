@@ -1,5 +1,6 @@
 import A1 from '@flighter/a1-notation'
-import { isPoint, isRect, newPoint, newRect, newSize, Point, Rect } from '@vertabiz/xy'
+import * as xy from '@vertabiz/xy'
+import { Point } from '@vertabiz/xy'
 
 // The distinction here is entirely for documentation purposes, as it
 // serves no type-checking function.
@@ -34,24 +35,24 @@ function isPointRange(rangeRef: RangeRef): boolean {
   return index + 1
 }
 
-export function asRect(ref: RangeRef | null): Rect | null {
+export function asRect(ref: RangeRef | null): xy.Rect | null {
   const parsed = parse(ref)
 
   if (parsed == null) return null
 
-  if (isRect(parsed)) {
+  if (xy.isRect(parsed)) {
     return parsed
   } else {
-    return newRect( parsed, newSize(1, 1) )
+    return xy.newRect( parsed, xy.newSize(1, 1) )
   }
 }
 
-export function originOf(ref: RangeRef | null): Point | null {
+export function originOf(ref: RangeRef | null): xy.Point | null {
   const parsed = parse(ref)
 
   if (parsed == null) return null
 
-  if (isPoint(parsed)) {
+  if (xy.isPoint(parsed)) {
     return parsed
   } else {
     return parsed.origin
@@ -65,12 +66,12 @@ export function originOf(ref: RangeRef | null): Point | null {
  * from(newPoint(4, 3))   // => 'E4'
  * ```
  */
-export function from(point: Point): CellRef
-export function from(rect: Rect): RangeRef
-export function from(value: Point | Rect | null): CellRef | RangeRef | null {
+export function from(point: xy.Point): CellRef
+export function from(rect: xy.Rect): RangeRef
+export function from(value: xy.Point | xy.Rect | null): CellRef | RangeRef | null {
   if (value == null) return null
 
-  if (isPoint(value)) {
+  if (xy.isPoint(value)) {
     return new A1(
       toOneBased(value.x),
       toOneBased(value.y),
@@ -86,6 +87,35 @@ export function from(value: Point | Rect | null): CellRef | RangeRef | null {
   }
 }
 
+export function shift(ref: RangeRef, { by }: { by: Point }): RangeRef {
+  const origin = originOf(ref)
+  const rect   = asRect(ref)
+
+  if (origin == null)
+    throw new Error(`Unexpected null origin in shift: ${ref}`)
+  if (rect == null)
+    throw new Error(`Unexpected null rect in shift: ${ref}`)
+
+  if (isPointRange(ref)) {
+    return from( xy.shiftPoint(origin, { by }) )
+  } else {
+    return from( xy.shiftRect(rect, { by }) )
+  }
+}
+
+export function splitRows(rangeRef: RangeRef | null, rowIndex: number): [ RangeRef | null, RangeRef | null ] {
+  const rect = asRect(rangeRef)
+  if (rect == null)
+    return [null, null]
+
+  const [rectOne, rectTwo] = xy.splitRectAfterY(rect, rect.origin.y + rowIndex - 1)
+
+  return [
+    rectOne ? from(rectOne) : null,
+    rectTwo ? from(rectTwo) : null,
+  ]
+}
+
 /**
  * Returns a Point or Rect based on an A1-notation string.
  *
@@ -94,14 +124,14 @@ export function from(value: Point | Rect | null): CellRef | RangeRef | null {
  * parse('A1:A1')   // => newRect( newPoint(0, 0), newSize(1, 1) )
  * ```
  */
-export function parse(rangeRef: RangeRef | null): Point | Rect | null {
+export function parse(rangeRef: RangeRef | null): xy.Point | xy.Rect | null {
   if (rangeRef == null) return null
 
   const a1 = new A1(rangeRef)
-  const origin = newPoint(a1.getCol() - 1, a1.getRow() - 1)
-  const size   = newSize(a1.getWidth(), a1.getHeight())
+  const origin = xy.newPoint(a1.getCol() - 1, a1.getRow() - 1)
+  const size   = xy.newSize(a1.getWidth(), a1.getHeight())
 
   return isRectRange(rangeRef)
-    ? newRect(origin, size)
+    ? xy.newRect(origin, size)
     : origin
 }

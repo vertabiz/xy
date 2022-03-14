@@ -1,6 +1,6 @@
 import test from 'ava'
 import { newPoint } from './point'
-import { intersection, newRect, farPointOf, expandTo, rectForPoints } from './rect'
+import { intersection, newRect, farPointOf, expandTo, rectForPoints, splitRectAfterY, shiftRect } from './rect'
 import { newSize } from './size'
 
 test('newRect', t => {
@@ -66,4 +66,24 @@ test('farPointOf -> returns opposite INCLUSIVE point of a Rect', t => {
   const oneByTwo = newRect( newPoint(10, 20), newSize(1, 2) )
 
   t.deepEqual( farPointOf(oneByTwo), newPoint(10, 21) )
+})
+
+test('splitRectAfterY -> returns a split rect', t => {
+  const rect = newRect( newPoint(5, 5), newSize(10, 10) ) // 5x5 to 14x14
+
+  const [ resultOne, resultTwo ] = splitRectAfterY(rect, 8)
+
+  t.deepEqual( resultOne, newRect({ x: 5, y: 5 }, { w: 10, h: 4 }) )
+  t.deepEqual( resultTwo, newRect({ x: 5, y: 9 }, { w: 10, h: 6 }) )
+})
+
+test('shift(rect, { by })', t => {
+  const rect = newRect(
+    newPoint(10, 40),
+    newSize(10, 10),
+  )
+
+  const shifted = shiftRect(rect, { by: newPoint(5, 0) })
+
+  t.deepEqual(shifted, newRect( newPoint(15, 40), newSize(10, 10) ))
 })

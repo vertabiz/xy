@@ -1,0 +1,40 @@
+{
+  "name": "@vertabiz/records",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "files": [
+    "package.json",
+    "package-lock.json",
+    "build/**"
+  ],
+  "scripts": {
+    "test": "ava",
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@ava/typescript": "^3.0.1",
+    "@types/lodash.clonedeep": "^4.5.6",
+    "@types/lodash.pick": "^4.4.6",
+    "ava": "^4.0.1",
+    "ts-node": "^10.6.0"
+  },
+  "ava": {
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
+  },
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.4.0",
+    "@vertabiz/cell-data": "^1.0.0",
+    "@vertabiz/grid": "^1.0.0",
+    "lodash.clonedeep": "^4.5.0",
+    "lodash.pick": "^4.4.0"
+  }
+}

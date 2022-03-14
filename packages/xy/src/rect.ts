@@ -1,4 +1,4 @@
-import { Point, isPointEqual, newPoint, isPoint } from './point'
+import { Point, isPointEqual, newPoint, isPoint, shiftPoint } from './point'
 import { Size, isSizeEqual, newSize, isSize } from './size'
 import { isObjectWithKey } from './util'
 
@@ -119,5 +119,34 @@ export function newRect(origin: Point, size: Size): Rect {
       w: width,
       h: height,
     },
+  }
+}
+
+export function shiftRect(rect: Rect, { by }: { by: Point }): Rect {
+  return newRect(
+    shiftPoint(rect.origin, { by }),
+    { ...rect.size },
+  )
+}
+
+export function splitRectAfterY(rect: Rect | null, y: number): [ Rect | null, Rect | null ] {
+  if (rect == null)
+    return [ null, null ]
+
+  if (y < rect.origin.y) {
+    return [ null, rect ]
+  } else if (y >= farPointOf(rect).y) {
+    return [ rect, null ]
+  } else {
+    return [
+      newRect(
+        rect.origin,
+        newSize(rect.size.w, y - rect.origin.y + 1),
+      ),
+      newRect(
+        newPoint(rect.origin.x, y + 1),
+        newSize(rect.size.w, farPointOf(rect).y - y)
+      ),
+    ]
   }
 }

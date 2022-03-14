@@ -12,6 +12,13 @@ export function isPoint(value: unknown): value is Point {
     && typeof value.y == 'number'
 }
 
+export function shiftPoint(point: Point, { by }: { by: Point }): Point {
+  return {
+    x: point.x + by.x,
+    y: point.y + by.y,
+  }
+}
+
 /**
  * Returns true if one Point is equal (value-wise) to another.
  *
