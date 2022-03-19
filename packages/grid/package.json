@@ -33,6 +33,7 @@
     "@vertabiz/cell-data": "^1.0.0",
     "@vertabiz/cell-map": "^1.0.0",
     "@vertabiz/range-ref": "^1.0.0",
+    "@vertabiz/xy": "^1.0.0",
     "lodash.clonedeep": "^4.5.0"
   }
 }

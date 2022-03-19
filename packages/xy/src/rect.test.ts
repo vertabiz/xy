@@ -1,6 +1,6 @@
 import test from 'ava'
-import { newPoint } from './point'
-import { intersection, newRect, farPointOf, expandTo, rectForPoints, splitRectAfterY, shiftRect } from './rect'
+import { newPoint, Point } from './point'
+import { intersection, newRect, farPointOf, expandTo, rectForPoints, splitRectAfterY, shiftRect, iteratePoints } from './rect'
 import { newSize } from './size'
 
 test('newRect', t => {
@@ -86,4 +86,16 @@ test('shift(rect, { by })', t => {
   const shifted = shiftRect(rect, { by: newPoint(5, 0) })
 
   t.deepEqual(shifted, newRect( newPoint(15, 40), newSize(10, 10) ))
+})
+
+test('iteratePoints(rect, fn)', t => {
+  const rect = newRect( newPoint(1, 5), newSize(5, 2) )
+
+  const results = [] as Point[]
+  iteratePoints(rect, (point) => results.push(point))
+
+  t.deepEqual(
+    results,
+    [ [1, 5], [2, 5], [3, 5], [4, 5], [5, 5], [1, 6], [2, 6], [3, 6], [4, 6], [5, 6] ].map(([x, y]) => newPoint(x, y))
+  )
 })

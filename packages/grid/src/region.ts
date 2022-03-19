@@ -1,16 +1,30 @@
 import * as ref from '@vertabiz/range-ref'
 import * as cm from '@vertabiz/cell-map'
-import { Row } from '.'
-import { newPoint } from '../../cell-map/node_modules/@vertabiz/xy/build'
-import { RangeRef } from '@vertabiz/range-ref'
+import { GridRow } from './rows'
+import { newPoint, newRect, newSize } from '@vertabiz/xy'
+import { CellRef, RangeRef } from '@vertabiz/range-ref'
+import { CellData } from '@vertabiz/cell-data'
 
-export type Region = {
+export type GridRegion = {
   range: ref.RangeRef
-  rows: Row[]
+  rows: GridRow[]
 }
 
-export function cellMapFromRegion(region: Region): cm.CellMap<cm.cell.CellData> {
-  const map = cm.newCellMap<cm.cell.CellData>()
+export function regionFrom(rows: GridRow[], originRef: CellRef = 'A1'): GridRegion {
+  const rowCount = rows.length
+  const columnCount = Math.max(...rows.map(_ => _.length))
+  const originPoint = ref.originOf(originRef)
+  if (originPoint == null)
+    throw new Error(`Could not parse 'originRef'`)
+
+  return {
+    range: ref.from(newRect( originPoint, newSize(columnCount, rowCount) )),
+    rows,
+  }
+}
+
+export function cellMapFromRegion(region: GridRegion): cm.CellMap {
+  const map = cm.newCellMap()
 
   const originPoint = ref.originOf(region.range)
   if (originPoint == null) return map

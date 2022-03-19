@@ -96,6 +96,14 @@ export function isRectEqual(rect: Rect | null, other: Rect | null): boolean {
       && isSizeEqual(rect.size, other.size)
 }
 
+export function iteratePoints(rect: Rect, fn: (point: Point) => void): void {
+  for (let y = rect.origin.y; y < rect.origin.y + rect.size.h; y++) {
+    for (let x = rect.origin.x; x < rect.origin.x + rect.size.w; x++) {
+      fn(newPoint(x, y))
+    }
+  }
+}
+
 export function newRect(origin: Point, size: Size): Rect {
   const width  = Math.abs(size.w)
   const height = Math.abs(size.h)

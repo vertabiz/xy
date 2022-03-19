@@ -1,6 +1,6 @@
 import { newPoint, newRect, newSize } from '@vertabiz/xy'
 import test from 'ava'
-import { asRect, from, parse, originOf, shift } from './range-ref'
+import { asRect, from, parse, originOf, shift, CellRef, iterateCells } from './range-ref'
 
 test('parse(A1) -> returns a Point', t => {
   const point = parse('A1')
@@ -56,3 +56,10 @@ test('from(rect) -> returns a RangeRef', t => {
   t.deepEqual(ref, 'F4:J5')
 })
 
+test('iterateCells(range) -> iterates through CellRefs', t => {
+  const result = [] as CellRef[]
+
+  iterateCells('F4:J5', cell => result.push(cell))
+
+  t.deepEqual(result, [ 'F4', 'G4', 'H4', 'I4', 'J4', 'F5', 'G5', 'H5', 'I5', 'J5' ])
+})

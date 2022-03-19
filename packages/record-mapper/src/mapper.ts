@@ -5,7 +5,7 @@ import * as rec from '@vertabiz/records'
 export type ToFieldMapping<TRecord> = {
   action: 'TO_FIELD'
   fieldName: keyof TRecord
-  ex: (row: grid.Row) => rec.FieldData | undefined
+  ex: (row: grid.GridRow) => rec.FieldData | undefined
 }
 export type ToColumnMapping<TRecord> = {
   action: 'TO_COLUMN'
@@ -33,7 +33,8 @@ export function buildSymmetricMappings<TRecord>(
       action: 'TO_FIELD',
       fieldName: field,
       ex: (row) => {
-        return rec.toFieldData(row[column])
+        // return rec.toFieldData(row[column])
+        return null
       }
     },
     {
@@ -43,7 +44,8 @@ export function buildSymmetricMappings<TRecord>(
         const fieldValue = record[field]
         if (fieldValue === undefined) return undefined
 
-        return cell.from(fieldValue)
+        // return cell.from(fieldValue)
+        return undefined
       }
     }
   ]
@@ -56,7 +58,7 @@ export function fromRow<TRecord>(mapper: RecordMapper<TRecord>, row: Record<stri
     if (mapping.action === 'TO_FIELD') {
       record = {
         ...record,
-        [mapping.fieldName]: mapping.ex(row),
+        // [mapping.fieldName]: mapping.ex(row),
       }
     }
   }

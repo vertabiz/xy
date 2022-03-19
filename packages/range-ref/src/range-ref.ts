@@ -1,6 +1,6 @@
-import A1 from '@flighter/a1-notation'
 import * as xy from '@vertabiz/xy'
 import { Point } from '@vertabiz/xy'
+import * as a1 from './a1'
 
 // The distinction here is entirely for documentation purposes, as it
 // serves no type-checking function.
@@ -13,7 +13,7 @@ export type RangeRef = string   // eg. 'A1:B2'
  * include ":" characters at some point.
  */
 function isRectRange(rangeRef: RangeRef): boolean {
-  return rangeRef.includes(':')
+  return a1.isRect(rangeRef)
 }
 
 /**
@@ -25,26 +25,58 @@ function isPointRange(rangeRef: RangeRef): boolean {
 }
 
 /**
- * Justification:
- * I know this seems excessive, like coding just for coding's sake. But
- * I will quickly get lost in the reasons for "+ 1"'s and "- 1"'s later in
- * the code, so this is mostly to document the REASON for these otherwise
- * simple code stanzas.
+ * I'm intentionally making it a bit more difficult to work with pure numbers
+ * in this module because it's a different numbering system (one-based) for most
+ * operations and it's easy to start messing things up.
  */
- function toOneBased(index: number): number {
-  return index + 1
+export class SeqNumber {
+  value: number
+  system: 'ONE-BASED' | 'ZERO-BASED'
+
+  constructor(value: number, system: 'ONE-BASED' | 'ZERO-BASED' = 'ONE-BASED') {
+    this.value = value
+    this.system = system
+  }
+
+  get oneBasedValue(): number {
+    return this.system === 'ONE-BASED'
+      ? this.value
+      : this.value + 1
+  }
+
+  get zeroBasedValue(): number {
+    return this.system === 'ZERO-BASED'
+      ? this.value
+      : this.value - 1
+  }
+
+  static fromZeroBased(value: number): SeqNumber {
+    return new SeqNumber(value + 1, 'ONE-BASED')
+  }
+
+  static fromOneBased(value: number): SeqNumber {
+    return new SeqNumber(value, 'ONE-BASED')
+  }
+
+  static from(value: number): SeqNumber {
+    return SeqNumber.fromZeroBased(value)
+  }
 }
 
-export function asRect(ref: RangeRef | null): xy.Rect | null {
+export function asRect(ref: RangeRef): xy.Rect {
   const parsed = parse(ref)
 
-  if (parsed == null) return null
+  if (parsed == null) throw new Error(`Invalid ref: ${ref}`)
 
   if (xy.isRect(parsed)) {
     return parsed
   } else {
     return xy.newRect( parsed, xy.newSize(1, 1) )
   }
+}
+
+export function bottomRow(ref: RangeRef): SeqNumber {
+  return SeqNumber.from( xy.farPointOf(asRect(ref)).y )
 }
 
 export function originOf(ref: RangeRef | null): xy.Point | null {
@@ -72,18 +104,12 @@ export function from(value: xy.Point | xy.Rect | null): CellRef | RangeRef | nul
   if (value == null) return null
 
   if (xy.isPoint(value)) {
-    return new A1(
-      toOneBased(value.x),
-      toOneBased(value.y),
-    ).toString()
+    return a1.toA1(value)
   } else {
-    return new A1(
-      toOneBased(value.origin.x),
-      toOneBased(value.origin.y),
-      // Yes, the AXIS arguments are reversed in the constructor.
-      value.size.h,
-      value.size.w,
-    ).toString()
+    const firstCell = a1.toA1(value.origin)
+    const lastCell = a1.toA1(xy.farPointOf(value))
+
+    return [ firstCell, lastCell ].join(':')
   }
 }
 
@@ -103,12 +129,12 @@ export function shift(ref: RangeRef, { by }: { by: Point }): RangeRef {
   }
 }
 
-export function splitRows(rangeRef: RangeRef | null, rowIndex: number): [ RangeRef | null, RangeRef | null ] {
+export function splitRows(rangeRef: RangeRef, { after }: { after: SeqNumber }): [ RangeRef | null, RangeRef | null ] {
   const rect = asRect(rangeRef)
   if (rect == null)
     return [null, null]
 
-  const [rectOne, rectTwo] = xy.splitRectAfterY(rect, rect.origin.y + rowIndex - 1)
+  const [rectOne, rectTwo] = xy.splitRectAfterY(rect, after.zeroBasedValue)
 
   return [
     rectOne ? from(rectOne) : null,
@@ -127,11 +153,18 @@ export function splitRows(rangeRef: RangeRef | null, rowIndex: number): [ RangeR
 export function parse(rangeRef: RangeRef | null): xy.Point | xy.Rect | null {
   if (rangeRef == null) return null
 
-  const a1 = new A1(rangeRef)
-  const origin = xy.newPoint(a1.getCol() - 1, a1.getRow() - 1)
-  const size   = xy.newSize(a1.getWidth(), a1.getHeight())
+  if (isRectRange(rangeRef)) {
+    return a1.parseA1(rangeRef)
+  } else {
+    return a1.parseA1Cell(rangeRef)
+  }
+}
 
-  return isRectRange(rangeRef)
-    ? xy.newRect(origin, size)
-    : origin
+export function iterateCells(rangeRef: RangeRef, fn: (cellRef: CellRef) => void) {
+  const rect = asRect(rangeRef)
+  if (rect == null) return
+
+  xy.iteratePoints(rect, (point) => {
+    fn(from(point))
+  })
 }

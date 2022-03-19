@@ -29,7 +29,6 @@
     ]
   },
   "dependencies": {
-    "@flighter/a1-notation": "^2.1.2",
     "@vertabiz/xy": "^1.0.0"
   }
 }

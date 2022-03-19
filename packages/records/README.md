@@ -1,8 +1,10 @@
-# @vertabiz/record-mapper #
+# @vertabiz/records #
+
+EXPERIMENTAL - actually, doesn't really do anything yet.
 
 ## Install
 
 ```bash
-$ npm install @vertabiz/record-mapper
+$ npm install @vertabiz/records
 ```
 
