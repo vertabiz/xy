@@ -1,11 +1,11 @@
 export type NumberCellData = {
-  value: number
+  value: string
   type: 'NUMBER'
 }
 
 export function from(val: number): NumberCellData {
   return {
     type: 'NUMBER',
-    value: val,
+    value: String(val),
   }
 }

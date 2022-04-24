@@ -1,8 +1,5 @@
-export * from './grid'
-export * from './region'
-export * from './rows'
-
-import * as cell from '@vertabiz/cell-data'
-
-export type GridRecord = Record<string, cell.CellData>
-
+export * from './CellGrid'
+export * from './CellRow'
+export * from './DataGrid'
+export * from './CellRecord'
+export * from './Region'

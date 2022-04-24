@@ -1,49 +1,80 @@
-import * as ref from '@vertabiz/range-ref'
 import * as cm from '@vertabiz/cell-map'
-import { GridRow } from './rows'
-import { newPoint, newRect, newSize } from '@vertabiz/xy'
-import { CellRef, RangeRef } from '@vertabiz/range-ref'
-import { CellData } from '@vertabiz/cell-data'
+import { CellMap } from '@vertabiz/cell-map'
+import * as ref from '@vertabiz/range-ref'
+import { CellRef, Range, RangeRef } from '@vertabiz/range-ref'
+import * as xy from '@vertabiz/xy'
+import { Point } from '@vertabiz/xy'
+import { CellRow } from './CellRow'
 
 export type GridRegion = {
   range: ref.RangeRef
-  rows: GridRow[]
+  rows: CellRow[]
 }
 
-export function regionFrom(rows: GridRow[], originRef: CellRef = 'A1'): GridRegion {
-  const rowCount = rows.length
-  const columnCount = Math.max(...rows.map(_ => _.length))
-  const originPoint = ref.originOf(originRef)
-  if (originPoint == null)
-    throw new Error(`Could not parse 'originRef'`)
+export class Region {
+  private _range: Range
+  private _map: CellMap
 
-  return {
-    range: ref.from(newRect( originPoint, newSize(columnCount, rowCount) )),
-    rows,
+  constructor({ range, map }: {
+    range: Range
+    map?: CellMap
+  }) {
+    this._range = range
+
+    this._map = new Map(map?.entries() ?? [])
+  }
+
+  get range() {
+    return this._range.copy()
+  }
+
+  cells(): IterableIterator<[string, cm.cell.CellData | undefined]> {
+    return this._map.entries()
+  }
+
+  getCellData(addr: string): cm.cell.CellData | undefined {
+    return this._map.get(addr) ?? undefined
+  }
+
+  asCellMap(): cm.CellMap {
+    return new Map(this._map.entries())
+  }
+
+  toRows(): CellRow[] {
+    const colNames = this._range.colNames()
+    return this._range.rowNames().map(rowName =>
+      colNames.map(colName => {
+        const addr = `${colName}${rowName}`
+        return this.getCellData(addr)
+      })
+    )
+  }
+
+  static fromRows(rows: CellRow[], range?: Range): Region {
+    const rowCount = rows.length
+    const columnCount = Math.max(...rows.map(_ => _.length))
+
+    const values: CellMap = new Map()
+
+    const rowRange = range ?? Range.fromAddress('A1').expandBy({ rows: rowCount - 1, cols: columnCount - 1 })
+
+    const originPt = rowRange.origin
+
+    rows.forEach((row, rowIdx) => {
+      row.forEach((cell, colIdx) => {
+        values.set(
+          Range.fromXY(xy.shiftPoint(originPt, { by: xy.newPoint(colIdx, rowIdx) })).asAddress(),
+          cell,
+        )
+      })
+    })
+
+    return new Region({
+      range: rowRange,
+      map: values,
+    })
   }
 }
 
-export function cellMapFromRegion(region: GridRegion): cm.CellMap {
-  const map = cm.newCellMap()
+export default Region
 
-  const originPoint = ref.originOf(region.range)
-  if (originPoint == null) return map
-
-  const origin = ref.from(originPoint)
-
-  const regionValues: Record<RangeRef, cm.cell.CellData> = {}
-
-  for (let rowIdx = 0; rowIdx < region.rows.length; rowIdx++) {
-    const row = region.rows[rowIdx]
-    for (let colIdx = 0; colIdx < row.length; colIdx++) {
-      const cell = row[colIdx]
-
-      if (cell !== undefined)
-        regionValues[ref.shift(origin, { by: newPoint(colIdx, rowIdx) })] = cell
-    }
-  }
-
-  cm.insertCells(map, cm.newCellMap(regionValues))
-
-  return map
-}

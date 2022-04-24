@@ -13,7 +13,7 @@
     "test": "ava",
     "build": "tsc"
   },
-  "author": "",
+  "author": "Brasten Sager (brasten@brasten.me)",
   "license": "MIT",
   "devDependencies": {
     "@ava/typescript": "^3.0.1",

@@ -14,6 +14,13 @@ export function isRect(value: unknown): value is Rect {
     && isSize(value.size)
 }
 
+export function copyRect(rect: Rect): Rect {
+  return {
+    origin: { ...rect.origin },
+    size: { ...rect.size },
+  }
+}
+
 export function expandTo(rect: Rect, point: Point): void {
   const farPoint = farPointOf(rect)
 
@@ -70,7 +77,7 @@ export function rectForPoints(points: Point[]): Rect | null {
  *         └───────┘
  *
  */
-export function intersection(rect: Rect | null, other: Rect | null): Rect | null {
+export function intersection(rect: Rect, other: Rect | null): Rect | null {
   if (rect == null || other == null)
     return null
 

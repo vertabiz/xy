@@ -1,1 +1,1 @@
-export * from './range-ref'
+export * from './RangeRef'

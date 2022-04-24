@@ -6,7 +6,8 @@ export type NilCellData = {
   type: 'NIL'
 }
 
-export type CellData = txt.TextCellData | num.NumberCellData | NilCellData
+export type CellData      = txt.TextCellData | num.NumberCellData | NilCellData
+export type CellPrimitive = string | number | null
 
 export function from(val: unknown): CellData {
   if (typeof val === 'string') {
@@ -20,4 +21,17 @@ export function from(val: unknown): CellData {
   }
 
   throw new Error(`Unrecognized primative type`)
+}
+
+export function value(cv: CellData | undefined): CellPrimitive | undefined {
+  if (cv === undefined) return undefined
+
+  switch (cv.type) {
+    case 'NIL':
+      return null
+    case 'NUMBER':
+      return Number(cv.value)
+    case 'TEXT':
+      return cv.value
+  }
 }

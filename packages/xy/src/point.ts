@@ -19,6 +19,13 @@ export function shiftPoint(point: Point, { by }: { by: Point }): Point {
   }
 }
 
+export function subtractPoint(minuend: Point, subtrahend: Point): Point {
+  return newPoint(
+    minuend.x - subtrahend.x,
+    minuend.y - subtrahend.y,
+  )
+}
+
 /**
  * Returns true if one Point is equal (value-wise) to another.
  *

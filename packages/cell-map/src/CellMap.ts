@@ -1,8 +1,7 @@
+import { CellData } from '@vertabiz/cell-data'
+import { Range } from '@vertabiz/range-ref'
 import type { Rect } from '@vertabiz/xy'
 import * as xy from '@vertabiz/xy'
-import * as refs from '@vertabiz/range-ref'
-import { isNotNil } from './util'
-import { CellData } from '@vertabiz/cell-data'
 
 export type CellMap = Map<string, CellData | undefined>
 
@@ -24,11 +23,13 @@ export function insertCells(map: CellMap, other: CellMap): void {
 }
 
 export function rectFor<T>(map: CellMap): Rect | null {
-  const cellKeys = Array.from(map.keys())
+  if (map.size < 1) return null
 
-  if (cellKeys.length < 1) return null
-
-  return xy.rectForPoints( cellKeys.map(refs.originOf).filter(isNotNil) )
+  return xy.rectForPoints(
+    Array.from(map.keys())
+      .map(Range.fromAddress)
+      .map(_ => _.origin)
+  )
 }
 
 export function asObject(map: CellMap): Record<string, CellData | undefined> {
