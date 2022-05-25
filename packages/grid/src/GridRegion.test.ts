@@ -1,7 +1,7 @@
-import test from 'ava'
 import * as cm from '@vertabiz/cell-map'
-import Region from './Region'
 import { Range } from '@vertabiz/range-ref'
+import test from 'ava'
+import Region from './Region'
 
 test('cellMapFromRegion(region)', t => {
   const region = Region.fromRows(
@@ -13,7 +13,7 @@ test('cellMapFromRegion(region)', t => {
   )
 
   t.deepEqual(
-    cm.asObject(region.asCellMap()),
+    region.asCellMap().asObject(),
     {
       B2: cm.cell.from('B2 Value'),
       C2: cm.cell.from('C2 Value'),

@@ -1,4 +1,3 @@
-import setProp from 'lodash.set'
 import * as cell from '@vertabiz/cell-data'
 
 /**

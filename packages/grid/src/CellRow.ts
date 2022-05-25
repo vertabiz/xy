@@ -1,10 +1,11 @@
 import * as cell from '@vertabiz/cell-data'
 import * as xy from '@vertabiz/xy'
+import { Size } from '@vertabiz/xy'
 
 export type CellRow = (cell.CellData | undefined)[]
 
 export function sizeOf(rows: CellRow[]): xy.Size {
-  return xy.newSize(
+  return new Size(
     Math.max(...rows.map(_ => _.length)),
     rows.length,
   )

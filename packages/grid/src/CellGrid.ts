@@ -1,10 +1,10 @@
 import { CellData } from '@vertabiz/cell-data'
-import * as cm from '@vertabiz/cell-map'
-import { newCellMap } from '@vertabiz/cell-map'
+import { CellMap } from '@vertabiz/cell-map'
 import { Range } from '@vertabiz/range-ref'
 import * as xy from '@vertabiz/xy'
-import { Region } from './Region'
+import { Point } from '@vertabiz/xy'
 import { CellRow } from './CellRow'
+import { Region } from './Region'
 
 /**
  * Stores cell addresses and values.
@@ -12,13 +12,13 @@ import { CellRow } from './CellRow'
  * Not entirely sure how this differs from CellMaps.
  */
 export class CellGrid {
-  currentCells = newCellMap()
+  currentCells = new CellMap()
 
   constructor({ regions }: {
     regions?: Region[]
   } = {}) {
     for (const region of (regions ?? [])) {
-      cm.insertCells(this.currentCells, region.asCellMap())
+      this.currentCells.insert(region.asCellMap())
     }
   }
 
@@ -26,7 +26,7 @@ export class CellGrid {
     if (this.currentCells.size < 1)
       return null       // we can't know anything.
 
-    const cellRect = cm.rectFor(this.currentCells)
+    const cellRect = this.currentCells.rect()
     if (cellRect === null)
       return null       // we probably SHOULD know something, but don't seem to.
 
@@ -42,10 +42,10 @@ export class CellGrid {
       throw new Error('Invalid range')
 
     const cells = xy.newMatrix<CellData | undefined>(rect.size, undefined)
-    const shiftBy = xy.newPoint(rect.origin.x * -1, rect.origin.y * -1) // new function (!)
+    const shiftBy = new Point(rect.origin.x * -1, rect.origin.y * -1) // new function (!)
 
-    xy.iteratePoints(rect, point => {
-      const cellIdx = xy.shiftPoint(point, { by: shiftBy })
+    rect.iteratePoints(point => {
+      const cellIdx = point.shiftPoint({ by: shiftBy })
 
       cells[cellIdx.y][cellIdx.x] = this.currentCells.get(Range.fromXY(point).asAddress())
     })
@@ -58,10 +58,9 @@ export class CellGrid {
     if (rect == null)
       throw new Error('Invalid range')
 
-    const shiftBy = xy.newPoint(rect.origin.x * -1, rect.origin.y * -1) // new function (!)
-
     for (const [addr, val] of region.cells()) {
-      this.currentCells.set(addr, val)
+      if (val !== undefined)
+        this.currentCells.set(addr, val)
     }
   }
 }

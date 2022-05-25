@@ -1,6 +1,6 @@
 import { cell } from '@vertabiz/cell-map'
 import { Range } from '@vertabiz/range-ref'
-import * as xy from '@vertabiz/xy'
+import { Point, Rect, Size } from '@vertabiz/xy'
 import CellGrid from './CellGrid'
 import CellRecord from './CellRecord'
 import { CellRow } from './CellRow'
@@ -49,11 +49,11 @@ export class DataGrid {
       const knownRange = this.cellGrid.knownRange()
       if (knownRange == null) return null
       const rect = knownRange.asRect()
-      if (!xy.isRect(rect)) return null
+      if (!(rect instanceof Rect)) return null
 
-      const nextRect = xy.newRect(
-        xy.newPoint(rect.origin.x, xy.farPointOf(rect).y + 1),
-        xy.newSize(rect.size.w, cellRows.length),
+      const nextRect = new Rect(
+        new Point(rect.origin.x, rect.farPoint.y + 1),
+        new Size(rect.size.w, cellRows.length),
       )
 
       return Range.fromXY(nextRect)

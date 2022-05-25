@@ -1,8 +1,7 @@
 import * as cm from '@vertabiz/cell-map'
 import { CellMap } from '@vertabiz/cell-map'
 import * as ref from '@vertabiz/range-ref'
-import { CellRef, Range, RangeRef } from '@vertabiz/range-ref'
-import * as xy from '@vertabiz/xy'
+import { Range } from '@vertabiz/range-ref'
 import { Point } from '@vertabiz/xy'
 import { CellRow } from './CellRow'
 
@@ -21,7 +20,9 @@ export class Region {
   }) {
     this._range = range
 
-    this._map = new Map(map?.entries() ?? [])
+    this._map = new CellMap()
+    if (map)
+      this._map.insert(map)
   }
 
   get range() {
@@ -36,8 +37,8 @@ export class Region {
     return this._map.get(addr) ?? undefined
   }
 
-  asCellMap(): cm.CellMap {
-    return new Map(this._map.entries())
+  asCellMap(): CellMap {
+    return this._map.copy()
   }
 
   toRows(): CellRow[] {
@@ -54,7 +55,7 @@ export class Region {
     const rowCount = rows.length
     const columnCount = Math.max(...rows.map(_ => _.length))
 
-    const values: CellMap = new Map()
+    const values: CellMap = new CellMap()
 
     const rowRange = range ?? Range.fromAddress('A1').expandBy({ rows: rowCount - 1, cols: columnCount - 1 })
 
@@ -62,10 +63,12 @@ export class Region {
 
     rows.forEach((row, rowIdx) => {
       row.forEach((cell, colIdx) => {
-        values.set(
-          Range.fromXY(xy.shiftPoint(originPt, { by: xy.newPoint(colIdx, rowIdx) })).asAddress(),
-          cell,
-        )
+        if (cell !== undefined) {
+          values.set(
+            Range.fromXY(originPt.shiftPoint({ by: new Point(colIdx, rowIdx) })).asAddress(),
+            cell,
+          )
+        }
       })
     })
 

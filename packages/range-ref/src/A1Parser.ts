@@ -1,4 +1,5 @@
 import * as xy from '@vertabiz/xy'
+import { Point, Rect, Size } from '@vertabiz/xy'
 
 export function isRect(range: string): boolean {
   return range.includes(':')
@@ -22,13 +23,13 @@ export function parseA1(range: string, opts?: { bounds?: string }): xy.Rect | nu
     return null
 
   if (endCell == undefined)
-    return xy.newRect(origin, xy.newSize(1, 1))
+    return new Rect(origin, new Size(1, 1))
 
   const farPoint = parseA1Cell(endCell, { anchor: endBound ?? startCell })
   if (farPoint == null)
-    return xy.newRect(origin, xy.newSize(1, 1))
+    return new Rect(origin, new Size(1, 1))
 
-  return xy.newRect(origin, xy.newSize(farPoint.x - origin.x + 1, farPoint.y - origin.y + 1))
+  return new Rect(origin, new Size(farPoint.x - origin.x + 1, farPoint.y - origin.y + 1))
 }
 
 const TOTAL_ALPHABETS = 'Z'.charCodeAt(0) - 'A'.charCodeAt(0) + 1
@@ -82,5 +83,5 @@ export function parseA1Cell(cell: string, opts?: { anchor?: string }): xy.Point 
     ? Number(row)
     : (anchorPoint?.y ?? -1) + 1
 
-  return xy.newPoint(columnNum - 1, rowNum - 1)
+  return new Point(columnNum - 1, rowNum - 1)
 }

@@ -20,7 +20,7 @@ export function from(val: unknown): CellData {
     }
   }
 
-  throw new Error(`Unrecognized primative type`)
+  throw new Error(`Unrecognized primative type: ${val}`)
 }
 
 export function value(cv: CellData | undefined): CellPrimitive | undefined {

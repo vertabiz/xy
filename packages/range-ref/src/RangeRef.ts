@@ -1,5 +1,5 @@
 import * as xy from '@vertabiz/xy'
-import { farPointOf, newPoint, Point } from '@vertabiz/xy'
+import { Point, Rect, Size } from '@vertabiz/xy'
 import * as a1 from './A1'
 import { must } from './util'
 
@@ -92,12 +92,11 @@ export class Range {
 
   expandBy({ rows, cols }: { rows: number; cols: number }): Range {
     const rect = this.asRect()
-    const farPoint = xy.farPointOf(rect)
 
     return Range.fromXY(
-      must(xy.rectForPoints([
+      must(Rect.fromPoints([
         rect.origin,
-        newPoint(farPoint.x + (rows ?? 0), farPoint.y + (cols ?? 0)),
+        new Point(rect.farPoint.x + (rows ?? 0), rect.farPoint.y + (cols ?? 0)),
       ])),
       { ns: this.ns },
     )
@@ -107,7 +106,7 @@ export class Range {
     const rowNames = [] as string[]
     const rect = this.asRect()
 
-    for (let i = rect.origin.y; i <= xy.farPointOf(rect).y; i++) {
+    for (let i = rect.origin.y; i <= rect.farPoint.y; i++) {
       rowNames.push(String(i + 1))
     }
 
@@ -118,7 +117,7 @@ export class Range {
     const colNames = [] as string[]
     const rect = this.asRect()
 
-    for (let i = rect.origin.x; i <= xy.farPointOf(rect).x; i++) {
+    for (let i = rect.origin.x; i <= rect.farPoint.x; i++) {
       colNames.push(a1.toA1Column(i))
     }
 
@@ -137,10 +136,10 @@ export class Range {
     if (parsed == null)
       throw new Error(`Invalid ref: ${this.toString()}`)
 
-    if (xy.isRect(parsed)) {
+    if (parsed instanceof Rect) {
       return parsed
     } else {
-      return xy.newRect( parsed, xy.newSize(1, 1) )
+      return new Rect( parsed, new Size(1, 1) )
     }
   }
 
@@ -154,7 +153,7 @@ export class Range {
   }
 
   bottomRow(): SeqNumber {
-    return SeqNumber.from( xy.farPointOf(this.asRect()).y )
+    return SeqNumber.from( this.asRect().farPoint.y )
   }
 
   get origin(): xy.Point {
@@ -162,7 +161,7 @@ export class Range {
     if (parsed == null)
       throw new Error(`Invalid origin point`)
 
-    if (xy.isPoint(parsed)) {
+    if (Point.is(parsed)) {
       return parsed
     } else {
       return parsed.origin
@@ -190,9 +189,9 @@ export class Range {
       throw new Error(`Unexpected null rect in shift: ${this.toString()}`)
 
     if (isPointRange(this.address)) {
-      return Range.fromXY( xy.shiftPoint(this.origin, { by }), { ns: this.ns } )
+      return Range.fromXY( this.origin.shiftPoint({ by }), { ns: this.ns } )
     } else {
-      return Range.fromXY( xy.shiftRect(rect, { by }), { ns: this.ns } )
+      return Range.fromXY( rect.shiftRect({ by }), { ns: this.ns } )
     }
   }
 
@@ -201,7 +200,7 @@ export class Range {
     if (rect == null)
       return [null, null]
 
-    const [rectOne, rectTwo] = xy.splitRectAfterY(rect, after.zeroBasedValue)
+    const [rectOne, rectTwo] = rect.splitRectAfterY(after.zeroBasedValue)
 
     return [
       rectOne ? Range.fromXY(rectOne, { ns: this.ns }) : null,
@@ -215,7 +214,7 @@ export class Range {
     const rect = this.asRect()
     if (rect == null) return
 
-    xy.iteratePoints(rect, (point) => {
+    rect.iteratePoints((point) => {
       fn(a1.toA1(point))
     })
   }
@@ -228,11 +227,11 @@ export class Range {
    * ```
    */
   static fromXY(value: xy.Point | xy.Rect, opts?: { ns?: string | null }): Range {
-    if (xy.isPoint(value)) {
+    if (Point.is(value)) {
       return new Range({ value: buildAddress(opts?.ns ?? null, a1.toA1(value), null) })
     } else {
       const firstCell = a1.toA1(value.origin)
-      const lastCell = a1.toA1(xy.farPointOf(value))
+      const lastCell = a1.toA1(value.farPoint)
 
       return new Range({ value: buildAddress(opts?.ns ?? null, firstCell, lastCell) })
     }
