@@ -1,5 +1,5 @@
-
-export * from './point'
-export * from './rect'
-export * from './size'
 export * from './matrix'
+export * from './Point'
+export * from './Rect'
+export * from './Size'
+

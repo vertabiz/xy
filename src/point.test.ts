@@ -1,23 +1,24 @@
 import test from 'ava'
-import { isPointEqual, newPoint, shiftPoint } from './point'
+import Point from './Point'
 
 test('newPoint', t => {
-  const point = newPoint(10, 20)
+  const point = new Point(10, 20)
 
-  t.deepEqual(point, { x: 10, y: 20 })
+  t.deepEqual(point.x, 10)
+  t.deepEqual(point.y, 20)
 })
 
 test('isPointEqual(point, other) -> returns true when points are the same', t => {
-  const point = newPoint(10, 40)
-  const other = newPoint(10, 40)
+  const point = new Point(10, 40)
+  const other = new Point(10, 40)
 
-  t.true( isPointEqual(point, other) )
+  t.true( point.isEqual(other) )
 })
 
 test('shiftPoint(point, { by })', t => {
-  const point = newPoint(10, 40)
+  const point = new Point(10, 40)
 
-  const shiftedPoint = shiftPoint(point, { by: newPoint(5, 0) })
+  const shiftedPoint = point.shiftPoint({ by: new Point(5, 0) })
 
-  t.deepEqual(shiftedPoint, newPoint(15, 40))
+  t.deepEqual(shiftedPoint, new Point(15, 40))
 })
